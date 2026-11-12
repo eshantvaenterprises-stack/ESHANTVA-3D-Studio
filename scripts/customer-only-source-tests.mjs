@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+const root=process.cwd();
+const text=(p)=>readFileSync(join(root,p),'utf8');
+const routes=['careers/page.tsx','careers/training/page.tsx','candidate/page.tsx','candidate/activate/page.tsx','verify-interview/page.tsx','admin/recruitment/page.tsx','admin/recruitment/legacy/page.tsx','admin/recruitment/extended/page.tsx'];
+const archivePresent=existsSync(join(root,'deferred-recruitment'));
+if (!archivePresent) console.log('ARCHIVE_ABSENT: original deferred recruitment archive was not captured; preservation NOT_VERIFIED.');
+let checks=0;
+function check(label,fn){fn();checks++;console.log('PASS',label);}
+check('eight recruiting routes removed from public app (archive checked when present)',()=>{for(const r of routes){assert.equal(existsSync(join(root,'app',r)),false,r);if(archivePresent) assert.equal(existsSync(join(root,'deferred-recruitment','app',r)),true,r);}});
+check('navigation excludes all candidate links',()=>{assert.doesNotMatch(text('src/data/navigation.ts'),/href:\s*['"]\/(?:careers|candidate|admin\/recruitment|verify-interview|recruitment-privacy)/);});
+check('customer admin navigation excludes recruitment',()=>{assert.doesNotMatch(text('src/components/admin/AdminPhase3Nav.tsx'),/href:\s*['"]\/admin\/recruitment/);});
+check('customer sitemap does not publish careers or recruitment',()=>{assert.doesNotMatch(text('app/sitemap.ts'),/['"]\/careers['"]/);assert.match(text('src/data/legalPolicies.ts'),/getCustomerLegalPolicies\(\)/);assert.match(text('src/data/legalPolicies.ts'),/!policy\.slug\.startsWith\('recruitment-'\)/);});
+check('customer legal summaries exclude recruitment (original archive checked when present)',()=>{if(archivePresent) assert.equal(existsSync(join(root,'deferred-recruitment/legalPolicies.original.ts')),true);const terms=text('src/data/legalPolicies.ts');assert.doesNotMatch(terms,/or recruitment interaction/);assert.doesNotMatch(terms,/How customers and candidates/);});
+check('legal policy route generation explicitly filters recruitment',()=>{assert.match(text('app/[...path]/page.tsx'),/getCustomerLegalPolicies\(\)/);assert.doesNotMatch(text('app/[...path]/page.tsx'),/getLegalPolicy\(/);assert.match(text('app/policies/page.tsx'),/getCustomerLegalPolicies\(\)/);});
+check('retail visibility still public by default, internal only explicitly',()=>{assert.match(text('src/config/retailVisibility.ts'),/configuredSurface === 'internal'/);assert.match(text('next.config.ts'),/internalRetailBuild \? \{\} : \{ '@\/data\/products': '\.\/src\/data\/publicProducts.ts' \}/);assert.match(text('src/data/publicProducts.ts'),/products: Product\[\] = \[\]/);});
+check('existing shop/cart/checkout pages still use retail gates',()=>{for(const r of ['app/shop/page.tsx','app/shop/[slug]/page.tsx','app/cart/page.tsx','app/checkout/page.tsx'])assert.match(text(r),/retailVisibility\.isInternal/);});
+check('customer custom/bulk/contact/account routes retained',()=>{for(const r of ['app/page.tsx','app/account/page.tsx','app/account/dashboard/page.tsx','app/contact/page.tsx','app/custom-order/page.tsx','app/bulk-order/page.tsx','app/admin/page.tsx'])assert.equal(existsSync(join(root,r)),true,r);});
+check('explicit Supabase browser config required',()=>{assert.doesNotMatch(text('src/config/supabase.ts'),/defaultSupabaseUrl|defaultPublishableKey|sb_publishable_/);assert.match(text('src/config/supabase.ts'),/NEXT_PUBLIC_SUPABASE_URL/);assert.match(text('src/config/supabase.ts'),/NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY/);});
+check('static shared header has explicit no-backend guard',()=>{assert.match(text('src/components/layout/Header.tsx'),/if \(!supabasePublicConfig\.url \|\| !supabasePublicConfig\.publishableKey\)/);});
+check('robots does not advertise retired recruitment paths',()=>{assert.doesNotMatch(text('app/robots.ts'), /deferredRecruitmentPaths|careers\/|candidate\/|verify-interview\/|admin\/recruitment/);assert.match(text('app/robots.ts'), /disallow: \[\.\.\.retailPaths, adminPath\]/);});
+check('static export architecture unchanged',()=>{assert.match(text('next.config.ts'),/output: 'export'/);assert.match(text('next.config.ts'),/trailingSlash: true/);});
+console.log(`CUSTOMER_ONLY_SOURCE_TESTS_PASS=${checks}`);

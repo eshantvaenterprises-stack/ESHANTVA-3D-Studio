@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 680" role="img" aria-labelledby="title desc">
+  <title id="title">Sample 3D printed object composition</title>
+  <desc id="desc">Abstract geometric placeholder showing a desk organizer, nameplate, bracket and decorative form.</desc>
+  <defs>
+    <linearGradient id="orange" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ff7b43"/><stop offset="1" stop-color="#d84312"/></linearGradient>
+    <linearGradient id="cream" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffaf0"/><stop offset="1" stop-color="#cfc8bc"/></linearGradient>
+    <linearGradient id="graphite" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#5b605b"/><stop offset="1" stop-color="#222523"/></linearGradient>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="0" dy="28" stdDeviation="24" flood-color="#000" flood-opacity=".32"/></filter>
+  </defs>
+  <ellipse cx="445" cy="596" rx="274" ry="49" fill="#090a09" opacity=".4"/>
+  <g filter="url(#shadow)">
+    <path d="M246 221 409 166l134 75-167 62z" fill="#faf6ec"/>
+    <path d="m246 221 130 82v227l-130-85z" fill="#c8c2b7"/>
+    <path d="m376 303 167-62v226l-167 63z" fill="url(#cream)"/>
+    <path d="M295 252v179l53 34V284z" fill="#202321"/>
+    <path d="M404 298v179l48-18V281z" fill="url(#orange)"/>
+    <path d="M474 272v166l42-16V256z" fill="#333734"/>
+  </g>
+  <g transform="translate(392 469) rotate(-6)" filter="url(#shadow)">
+    <path d="M0 0 215-15l45 32-218 18z" fill="#f5f0e6"/>
+    <path d="m42 35 218-18v55L42 92z" fill="#b9b2a7"/>
+    <path d="M0 0 42 35v57L0 54z" fill="#918b82"/>
+    <text x="102" y="54" fill="#242725" font-family="Arial,sans-serif" font-size="23" font-weight="700" letter-spacing="4">SAMPLE</text>
+  </g>
+  <g transform="translate(534 91)" filter="url(#shadow)">
+    <path d="M72 0 145 43v85l-73 43L0 128V43z" fill="url(#orange)"/>
+    <path d="M72 33 116 58v52l-44 26-43-26V58z" fill="#232624"/>
+    <path d="M72 0v33L29 58 0 43z" fill="#ff9465" opacity=".75"/>
+  </g>
+  <g transform="translate(102 376) rotate(10)" filter="url(#shadow)">
+    <path d="M0 0h124v36H42v106H0z" fill="url(#graphite)"/>
+    <circle cx="22" cy="19" r="7" fill="#d9d4ca"/>
+    <circle cx="21" cy="121" r="7" fill="#d9d4ca"/>
+  </g>
+  <g fill="none" stroke="#727771" stroke-width="2" opacity=".6">
+    <path d="M115 191h116M173 133v116"/><circle cx="173" cy="191" r="43"/>
+  </g>
+</svg>

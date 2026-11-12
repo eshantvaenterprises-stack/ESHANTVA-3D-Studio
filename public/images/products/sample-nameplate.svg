@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 520">
+  <defs><filter id="s"><feDropShadow dx="0" dy="24" stdDeviation="20" flood-opacity=".2"/></filter></defs>
+  <rect width="600" height="520" fill="#d8d4ca"/><g filter="url(#s)" transform="translate(86 169) rotate(-4 210 90)"><path d="M0 0h417l63 45-421 11z" fill="#fcf7ed"/><path d="m59 56 421-11v115L59 176z" fill="#e85823"/><path d="M0 0l59 56v120L0 119z" fill="#bc3e13"/><text x="142" y="125" font-family="Arial" font-size="34" font-weight="800" letter-spacing="7" fill="#fff">SAMPLE</text></g><text x="30" y="45" font-family="Arial" font-size="12" font-weight="700" letter-spacing="3" fill="#676a64">SAMPLE PRODUCT / 02</text>
+</svg>

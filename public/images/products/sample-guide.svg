@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 520">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#5e635e"/><stop offset="1" stop-color="#1e211f"/></linearGradient><filter id="s"><feDropShadow dx="0" dy="24" stdDeviation="18" flood-opacity=".2"/></filter></defs>
+  <rect width="600" height="520" fill="#ede9df"/><g filter="url(#s)" transform="translate(126 104)"><path d="M43 0h254l43 43v235l-43 43H43L0 278V43z" fill="url(#g)"/><path d="M92 74h155l28 28v117l-28 28H92l-28-28V102z" fill="#ede9df"/><path d="M141 121h57l19 19v40l-19 19h-57l-19-19v-40z" fill="#e85823"/></g><g fill="none" stroke="#c3c0b7"><circle cx="300" cy="265" r="185"/><circle cx="300" cy="265" r="220"/></g><text x="30" y="45" font-family="Arial" font-size="12" font-weight="700" letter-spacing="3" fill="#676a64">SAMPLE PRODUCT / 03</text>
+</svg>

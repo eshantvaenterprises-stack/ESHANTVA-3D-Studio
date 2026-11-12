@@ -1,0 +1,24 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {validateEnvironment,parseEnv,mainRef,overrides}from'./host-neutral-environment.mjs';
+const base={NEXT_PUBLIC_SUPABASE_URL:`https://${mainRef}.supabase.co`,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:'sb_publishable_syntheticfixtureonly',NEXT_PUBLIC_RETAIL_SURFACE:'public',NEXT_PUBLIC_RECRUITMENT_PORTAL_ENABLED:'false'};
+const results=[];function check(name,fn){fn();results.push({name,status:'PASS'})}
+check('local-browser-public-contract',()=>assert.equal(validateEnvironment(base).status,'PASS'));
+check('root-basepath-normalizes-like-next',()=>assert.equal(validateEnvironment({...base,NEXT_PUBLIC_BASE_PATH:'/'}).status,'PASS'));
+check('service-role-jwt-rejected',()=>{const jwt='x.'+Buffer.from(JSON.stringify({role:'service_role'})).toString('base64url')+'.x';assert.notEqual(validateEnvironment({...base,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:jwt}).status,'PASS')});
+check('private-name-rejected',()=>assert.notEqual(validateEnvironment({...base,NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY:'synthetic'}).status,'PASS'));
+check('wrong-project-rejected',()=>assert.notEqual(validateEnvironment({...base,NEXT_PUBLIC_SUPABASE_URL:'https://rjamqgbdzytujqxkecga.supabase.co'}).status,'PASS'));
+check('foreign-override-rejected',()=>assert.notEqual(validateEnvironment({...base,NEXT_PUBLIC_SUPABASE_CONTACT_REQUEST_FUNCTION_URL:'https://untrusted.example/functions/v1/contact-request-api'}).status,'PASS'));
+check('retired-override-rejected',()=>assert.notEqual(validateEnvironment({...base,NEXT_PUBLIC_SUPABASE_ADMIN_ARTIFACT_FUNCTION_URL:base.NEXT_PUBLIC_SUPABASE_URL+'/functions/v1/admin-artifacts-api'}).status,'PASS'));
+check('canonical-overrides-accepted',()=>{const e={...base};for(const[k,v]of Object.entries(overrides))e[`NEXT_PUBLIC_SUPABASE_${k}_FUNCTION_URL`]=base.NEXT_PUBLIC_SUPABASE_URL+'/functions/v1/'+v;assert.equal(validateEnvironment(e).status,'PASS')});
+check('public-retail-cannot-unhide',()=>assert.notEqual(validateEnvironment({...base,NEXT_PUBLIC_RETAIL_SURFACE:'internal'}).status,'PASS'));
+check('candidate-cannot-open',()=>assert.notEqual(validateEnvironment({...base,NEXT_PUBLIC_RECRUITMENT_PORTAL_ENABLED:'true'}).status,'PASS'));
+check('no-host-cannot-certify-global',()=>assert.equal(validateEnvironment(base,{profile:'approved-host'}).status,'BLOCKED_EXACT'));
+check('unknown-profile-fails-closed',()=>assert.equal(validateEnvironment(base,{profile:'production-typo'}).status,'BLOCKED_EXACT'));
+check('approved-origin-still-requires-effective-host-receipt',()=>{const origin='https://approved-fixture.example';const auth={siteUrl:origin,redirects:[origin+'/account/?confirmed=1',origin+'/account/reset/',origin+'/account/reset/?mode=finish-account']};const edgeOrigins=Object.fromEntries(['CONTACT_ALLOWED_ORIGINS','CUSTOM_ORDER_ALLOWED_ORIGINS','BULK_ORDER_ALLOWED_ORIGINS','DASHBOARD_ALLOWED_ORIGINS','ADMIN_ALLOWED_ORIGINS'].map(n=>[n,[origin]]));const r=validateEnvironment({...base,NEXT_PUBLIC_SITE_URL:origin},{profile:'approved-host',approvedOrigin:origin,auth,edgeOrigins});assert.equal(r.findings.length,0);assert.equal(r.status,'BLOCKED_EXACT');assert.ok(r.remaining.includes('APPROVED_HOST_EFFECTIVE_BUILD_RUNTIME_AND_SCOPED_HTTP_SMOKE'))});
+check('wrong-callback-is-not-accepted',()=>{const origin='https://approved-fixture.example';const r=validateEnvironment({...base,NEXT_PUBLIC_SITE_URL:origin},{profile:'approved-host',approvedOrigin:origin,auth:{siteUrl:origin,redirects:[origin+'/']}});assert.ok(r.findings.some(x=>x.code==='EXACT_CALLBACK_COVERAGE_MISSING'))});
+check('expired-zero-legacy-key-rejected',()=>{const jwt='x.'+Buffer.from(JSON.stringify({role:'anon',ref:mainRef,exp:0})).toString('base64url')+'.x';assert.equal(validateEnvironment({...base,NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:jwt}).status,'BLOCKED_EXACT')});
+check('no-placeholder-public-origin',()=>assert.equal(validateEnvironment({...base,NEXT_PUBLIC_SITE_URL:'https://<APPROVED_ORIGIN>'}).status,'BLOCKED_EXACT'));
+check('env-parser-no-eval',()=>{const e=parseEnv('NEXT_PUBLIC_BASE_PATH="/studio"\nX=$(unsafe)\n#ignored=true');assert.equal(e.NEXT_PUBLIC_BASE_PATH,'/studio');assert.equal(e.X,'$(unsafe)')});
+check('output-does-not-export-input-values',()=>{const e={...base,NEXT_PUBLIC_SECRET:'SYNTHETIC_PRIVATE_SENTINEL'};assert.ok(!JSON.stringify(validateEnvironment(e)).includes('SYNTHETIC_PRIVATE_SENTINEL'))});
+fs.mkdirSync('execution-evidence/V7_POST_CHAT_01NOV2026/g5',{recursive:true});fs.writeFileSync('execution-evidence/V7_POST_CHAT_01NOV2026/g5/ENV_CONTRACT_TESTS.json',JSON.stringify({scope:'SYNTHETIC_OFFLINE_CONFIG_VALIDATION_NOT_HOST_OR_MAIN_RUNTIME',results},null,2));console.log(`${results.length}/${results.length} PASS`);

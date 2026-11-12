@@ -1,0 +1,32 @@
+.launchers {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(20px, env(safe-area-inset-bottom));
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+.bubble {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 18%);
+  text-decoration: none;
+  transition: transform .15s ease;
+}
+.bubble:hover { transform: translateY(-2px); }
+.bubble:focus-visible { outline: 3px solid #111; outline-offset: 3px; }
+.whatsapp { background: #25D366; color: #fff; }
+.whatsappBubble { position: absolute; }
+.phone { position: absolute; transform: rotate(-15deg); }
+.arattai { background: #136B75; color: #fff; }
+.arattaiGlyph { font: 800 25px/1 sans-serif; }
+@media (max-width: 480px) {
+  .launchers { right: max(12px, env(safe-area-inset-right)); bottom: max(16px, env(safe-area-inset-bottom)); }
+  .bubble { width: 46px; height: 46px; }
+}

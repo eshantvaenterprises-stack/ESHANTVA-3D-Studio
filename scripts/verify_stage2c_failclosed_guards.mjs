@@ -1,0 +1,15 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const read=p=>fs.readFileSync(p,'utf8');
+const bank=read('supabase/functions/recruitment-bank-api/index.ts');
+const exp=read('supabase/functions/recruitment-extended-export-api/index.ts');
+const mail=read('supabase/functions/recruitment-extended-training-email/index.ts');
+assert(bank.includes("db.rpc('recruitment_bank_save_with_audit_server'")&&!bank.includes("db.from('recruitment_candidate_payment_details').upsert"));
+assert(bank.includes("if(atomicError||committed!==true)return respond(503,origin,'BANK_TRANSACTION_NOT_COMMITTED')"));
+assert(exp.indexOf("if(accessError)return replyError(origin,503,'EXPORT_ACCESS_AUDIT_UNAVAILABLE')") < exp.indexOf('.createSignedUrl(path,60'));
+assert(mail.includes("p_target_state:'REVIEW_REQUIRED'")&&mail.includes('23*60*60*1000'));
+assert(mail.includes("'Idempotency-Key':item.id"));
+assert(mail.includes("db.rpc('recruitment_transition_training_email_server'")&&mail.includes("p_expected_state:'SENDING'"));
+assert(mail.includes("recipientEmail!==person.email.trim().toLowerCase()"));
+assert(mail.includes("RECRUITMENT_TRAINING_EMAIL_ENABLED')!=='true'"));
+console.log('PASS 8/8 fail-closed audit/email recovery source checks; no live email sent');

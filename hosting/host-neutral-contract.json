@@ -1,0 +1,19 @@
+{
+  "status": "PENDING_FOUNDER_HOST_SELECTION",
+  "scope": "Local acceptance contract only; no provider selected or production headers configured",
+  "headers": {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()"
+  },
+  "pending": ["HTTPS/HSTS verification", "CSP with approved backend origin and static inline-script hashes", "Provider-specific header and rewrite translation", "Effective deployed response verification"],
+  "deepLinks": [
+    { "source": "/admin/customers/:reference", "destination": "/admin/customer/" },
+    { "source": "/admin/requests/custom/:reference", "destination": "/admin/custom-request/" },
+    { "source": "/admin/requests/bulk/:reference", "destination": "/admin/bulk-request/" },
+    { "source": "/admin/orders/:reference", "destination": "/admin/order/" },
+    { "source": "/account/orders/:reference/files", "destination": "/account/order-files/" },
+    { "source": "/account/orders/:reference", "destination": "/account/orders/" }
+  ]
+}

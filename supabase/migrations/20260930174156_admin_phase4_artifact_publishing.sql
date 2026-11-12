@@ -1,0 +1,3 @@
+-- Historical production migration entry. Its temporary parallel upload-session model
+-- was superseded immediately by 20260930174400_admin_phase4_canonical_upload_repair.sql.
+-- Kept as a no-op locally so migration history stays aligned without recreating the retired model.
