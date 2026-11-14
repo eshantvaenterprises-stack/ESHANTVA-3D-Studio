@@ -10,11 +10,12 @@ import { z } from 'zod';
 const origin = 'https://synthetic.example.invalid';
 const userId = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
 let checks = 0;
+const canonicalOriginSource = fs.readFileSync('supabase/functions/_shared/canonicalOrigin.ts', 'utf8').replace(/^export /gm, '');
 for (const slug of ['custom-request-api', 'bulk-request-api', 'contact-request-api', 'checkout-order-api', 'customer-dashboard-api', 'admin-api', 'admin-artifact-api']) {
   for (const captured of [false, true]) {
     const file = captured ? `../backend/edge-functions/${slug}/deployed-source/index.ts` : `supabase/functions/${slug}/index.ts`;
     const source = fs.readFileSync(file, 'utf8').replace(/^import[^\n]+\r?\n/gm, '');
-    const code = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None } }).outputText;
+    const code = ts.transpileModule(canonicalOriginSource + '\n' + source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None } }).outputText;
     let handler, currentUser = null;
     const queries = [];
     const client = { auth: { getUser: async () => ({ data: { user: currentUser }, error: null }) }, from(table) {
