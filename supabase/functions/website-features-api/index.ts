@@ -1,3 +1,4 @@
+import { isCanonicalWebsiteOrigin } from '../_shared/canonicalOrigin.ts';
 import { readWebsiteJson } from '../_shared/websiteSecurity.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.116.0';
 import { contentInput, publicContent, requestIdentity, text, uuid, version } from '../_shared/websiteContracts.ts';
@@ -6,7 +7,7 @@ const mutations=new Set(['cms-save','cms-review','cms-publish','cms-unpublish','
 function reply(origin:string|null,status:number,data:unknown){const headers:Record<string,string>={'Content-Type':'application/json','Cache-Control':'no-store','Vary':'Origin','X-Content-Type-Options':'nosniff'};if(origin)headers['Access-Control-Allow-Origin']=origin;return new Response(JSON.stringify(data),{status,headers});}
 function safeFollowup(r:Record<string,unknown>){return {reference:r.public_reference,kind:r.kind,requestReference:r.request_reference,question:r.question,reply:r.reply,state:r.state,createdAt:r.created_at,repliedAt:r.replied_at};}
 Deno.serve(async(req:Request)=>{
- const requestedOrigin=req.headers.get('origin');const origins=(Deno.env.get('WEBSITE_ALLOWED_ORIGINS')||Deno.env.get('ADMIN_ALLOWED_ORIGINS')||'').split(',').map(x=>x.trim()).filter(Boolean);const origin=requestedOrigin&&origins.includes(requestedOrigin)?requestedOrigin:null;
+ const requestedOrigin=req.headers.get('origin');const origins=(Deno.env.get('WEBSITE_ALLOWED_ORIGINS')||Deno.env.get('ADMIN_ALLOWED_ORIGINS')||'').split(',').map(x=>x.trim()).filter(Boolean);const origin=requestedOrigin&&(origins.includes(requestedOrigin)||isCanonicalWebsiteOrigin(requestedOrigin))?requestedOrigin:null;
  if(requestedOrigin&&!origin)return reply(null,403,{ok:false,code:'ACCESS_DENIED'});
  if(req.method==='OPTIONS')return new Response(null,{status:204,headers:{...(origin?{'Access-Control-Allow-Origin':origin}:{}),'Access-Control-Allow-Headers':'authorization, apikey, content-type','Access-Control-Allow-Methods':'POST, OPTIONS','Vary':'Origin'}});
  if(req.method!=='POST')return reply(origin,405,{ok:false,code:'METHOD_NOT_ALLOWED'});

@@ -1,3 +1,4 @@
+import { isCanonicalWebsiteOrigin } from '../_shared/canonicalOrigin.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.116.0';
 
 const activeOrderStatuses = new Set(['pending_payment','payment_processing','paid','under_review','confirmed','in_production','ready_for_pickup','shipped']);
@@ -59,7 +60,7 @@ function safeOptions(value: unknown) {
   }).slice(0,30);
 }
 
-async function dashboardOverview(admin: ReturnType<typeof createClient>, user: { id:string; email?:string; user_metadata?:Record<string,unknown> }, origin: string | null) {
+async function dashboardOverview(admin: ReturnType<typeof createClient<any, 'public'>>, user: { id:string; email?:string; user_metadata?:Record<string,unknown> }, origin: string | null) {
   const [ordersResult, customResult, bulkResult, ordersCount, activeOrdersCount, customCount, bulkCount] = await Promise.all([
     admin.from('orders').select('id,public_order_id,status,payment_status,currency,total_paise,delivery_method,created_at').eq('customer_id', user.id).order('created_at', { ascending:false }).limit(20),
     admin.from('custom_requests').select('public_request_id,status,submitted_at,created_at').eq('customer_id', user.id).neq('status','DRAFT').not('public_request_id','is',null).order('created_at', { ascending:false }).limit(8),
@@ -128,7 +129,7 @@ async function dashboardOverview(admin: ReturnType<typeof createClient>, user: {
   } });
 }
 
-async function orderDetail(admin: ReturnType<typeof createClient>, userId: string, body: Record<string,unknown>, origin: string | null) {
+async function orderDetail(admin: ReturnType<typeof createClient<any, 'public'>>, userId: string, body: Record<string,unknown>, origin: string | null) {
   const reference = typeof body.reference === 'string' ? body.reference.trim().toUpperCase() : '';
   if (!publicOrderReferencePattern.test(reference)) return response(origin, 404, { ok:false, error:'Order unavailable.', code:'ORDER_UNAVAILABLE' });
 
@@ -236,7 +237,7 @@ function approvalStatusLabel(status: string) {
 }
 
 async function ownedOrderId(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   customerId: string,
   reference: string,
 ) {
@@ -251,7 +252,7 @@ async function ownedOrderId(
 }
 
 async function orderFilesOverview(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   customerId: string,
   body: Record<string,unknown>,
   origin: string | null,
@@ -369,7 +370,7 @@ async function orderFilesOverview(
 }
 
 async function artifactAccess(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   customerId: string,
   body: Record<string,unknown>,
   origin: string | null,
@@ -415,7 +416,7 @@ async function artifactAccess(
 }
 
 async function submitArtifactApproval(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   customerId: string,
   body: Record<string,unknown>,
   origin: string | null,
@@ -485,7 +486,7 @@ Deno.serve(async (request) => {
     Deno.env.get('CHECKOUT_ALLOWED_ORIGINS'),
     Deno.env.get('CONTACT_ALLOWED_ORIGINS'),
   ].filter(Boolean).flatMap((value) => value!.split(',')).map((value) => value.trim()).filter(Boolean);
-  const allowedOrigin = origin && allowedOrigins.includes(origin) ? origin : null;
+  const allowedOrigin = origin && (allowedOrigins.includes(origin) || isCanonicalWebsiteOrigin(origin)) ? origin : null;
 
   if (origin && !allowedOrigin) return response(null, 403, { ok:false, error:'Account request origin is not allowed.' });
   if (request.method === 'OPTIONS') {

@@ -1,3 +1,4 @@
+import { isCanonicalWebsiteOrigin } from '../_shared/canonicalOrigin.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.116.0';
 
 const activeOrderStatuses = [
@@ -104,7 +105,7 @@ function allowedTransitions(
 }
 
 async function requireAdmin(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   userId: string,
 ): Promise<AdminRecord | null> {
   const { data, error } = await admin
@@ -117,7 +118,7 @@ async function requireAdmin(
   if (!data || (data.role !== 'ADMIN' && data.role !== 'STAFF')) return null;
   return { role: data.role, display_name: data.display_name };
 }
-async function summary(admin: ReturnType<typeof createClient>) {
+async function summary(admin: ReturnType<typeof createClient<any, 'public'>>) {
   const [orders, activeOrders, customRequests, bulkRequests, pendingApprovals] =
     await Promise.all([
       admin.from('orders').select('id', { count: 'exact', head: true }),
@@ -226,7 +227,7 @@ async function readAdminPage<Row>(
 }
 
 async function ordersList(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   authorized: AdminRecord,
   body: Record<string, unknown>,
   origin: string | null,
@@ -273,7 +274,7 @@ async function ordersList(
 }
 
 async function orderDetail(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   authorized: AdminRecord,
   body: Record<string, unknown>,
   origin: string | null,
@@ -406,7 +407,7 @@ async function orderDetail(
 }
 
 async function transitionOrder(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   authorized: AdminRecord,
   userId: string,
   body: Record<string, unknown>,
@@ -766,7 +767,7 @@ function readPhase3Sort(body: Record<string, unknown>) {
 }
 
 async function customersList(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   authorized: AdminRecord,
   body: Record<string, unknown>,
   origin: string | null,
@@ -824,7 +825,7 @@ async function customersList(
   });
 }
 async function customerDetail(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   authorized: AdminRecord,
   body: Record<string, unknown>,
   origin: string | null,
@@ -965,7 +966,7 @@ function readCustomRequestInput(body: Record<string, unknown>) {
   };
 }
 async function customRequestsList(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   authorized: AdminRecord,
   body: Record<string, unknown>,
   origin: string | null,
@@ -1016,7 +1017,7 @@ async function customRequestsList(
   });
 }
 async function customRequestDetail(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   authorized: AdminRecord,
   body: Record<string, unknown>,
   origin: string | null,
@@ -1175,7 +1176,7 @@ function readBulkRequestInput(body: Record<string, unknown>) {
   };
 }
 async function bulkRequestsList(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   authorized: AdminRecord,
   body: Record<string, unknown>,
   origin: string | null,
@@ -1259,7 +1260,7 @@ async function bulkRequestsList(
   });
 }
 async function bulkRequestDetail(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   authorized: AdminRecord,
   body: Record<string, unknown>,
   origin: string | null,
@@ -1410,7 +1411,7 @@ async function bulkRequestDetail(
 }
 
 async function transitionCustomRequest(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   authorized: AdminRecord,
   userId: string,
   body: Record<string, unknown>,
@@ -1457,7 +1458,7 @@ async function transitionCustomRequest(
   return response(origin, 200, { ok: true, data });
 }
 async function transitionBulkRequest(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   authorized: AdminRecord,
   userId: string,
   body: Record<string, unknown>,
@@ -1549,7 +1550,7 @@ function requestTransitionError(origin: string | null, error: unknown) {
 // Read-only, privacy-preserving monthly operational counts. Not a payment,
 // GST, invoice or revenue ledger. Month boundaries are 00:00 IST to 00:00 IST.
 async function adminMonthlyOperationalSummary(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   authorized: AdminRecord,
   body: Record<string, unknown>,
   origin: string | null,
@@ -1592,7 +1593,7 @@ const requestAttachmentFileIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-
 const requestAttachmentPreviewTypes = new Set(['application/pdf','image/jpeg','image/png','image/webp']);
 const requestAttachmentSignedSeconds = 60;
 async function readAdminRequestAttachment(
-  admin: ReturnType<typeof createClient>,
+  admin: ReturnType<typeof createClient<any, 'public'>>,
   role: AdminRecord['role'],
   actorId: string,
   body: Record<string, unknown>,
@@ -1676,7 +1677,7 @@ Deno.serve(async (request) => {
       .split(',')
       .map((v) => v.trim())
       .filter(Boolean),
-    allowedOrigin = origin && allowedOrigins.includes(origin) ? origin : null;
+    allowedOrigin = origin && (allowedOrigins.includes(origin) || isCanonicalWebsiteOrigin(origin)) ? origin : null;
   if (origin && !allowedOrigin)
     return response(null, 403, {
       ok: false,

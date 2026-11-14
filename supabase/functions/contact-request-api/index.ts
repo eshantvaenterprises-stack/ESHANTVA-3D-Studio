@@ -1,3 +1,4 @@
+import { isCanonicalWebsiteOrigin } from '../_shared/canonicalOrigin.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4';
 import { z } from 'npm:zod@4.6.7';
 
@@ -129,7 +130,7 @@ Deno.serve(async (request) => {
   const origin = request.headers.get('origin');
   const allowedOrigins = (Deno.env.get('CONTACT_ALLOWED_ORIGINS') || '')
     .split(',').map((value) => value.trim()).filter(Boolean);
-  const allowedOrigin = origin && (allowedOrigins.includes(origin) || isExactPreviewOrigin(origin, 'CONTACT_PREVIEW_ALLOWED_ORIGIN')) ? origin : null;
+  const allowedOrigin = origin && (allowedOrigins.includes(origin) || isCanonicalWebsiteOrigin(origin) || isExactPreviewOrigin(origin, 'CONTACT_PREVIEW_ALLOWED_ORIGIN')) ? origin : null;
 
   if (origin && !allowedOrigin) return reply(null, 403, { ok: false, error: 'Origin is not allowed.' });
   if (request.method === 'OPTIONS') {

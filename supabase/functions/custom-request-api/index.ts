@@ -1,3 +1,4 @@
+import { isCanonicalWebsiteOrigin } from '../_shared/canonicalOrigin.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.57.4';
 import { z } from 'npm:zod@4.6.7';
 import { sendCustomRequestConfirmation } from '../_shared/notification.ts';
@@ -73,7 +74,7 @@ async function hash(value: string) {
 Deno.serve(async (request) => {
   const origin = request.headers.get('origin');
   const allowedOrigins = (Deno.env.get('CUSTOM_ORDER_ALLOWED_ORIGINS') || '').split(',').map((item) => item.trim()).filter(Boolean);
-  if (origin && !allowedOrigins.includes(origin)) return response(null, 403, { ok: false, error: 'Origin is not allowed.' });
+  if (origin && !(allowedOrigins.includes(origin) || isCanonicalWebsiteOrigin(origin))) return response(null, 403, { ok: false, error: 'Origin is not allowed.' });
   if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: { 'Access-Control-Allow-Origin': origin || '', 'Access-Control-Allow-Headers': 'authorization, apikey, content-type', 'Access-Control-Allow-Methods': 'POST, OPTIONS', 'Vary': 'Origin' } });
   if (request.method !== 'POST') return response(origin, 405, { ok: false, error: 'Method not allowed.' });
 

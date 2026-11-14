@@ -1,3 +1,4 @@
+import { isCanonicalWebsiteOrigin } from '../_shared/canonicalOrigin.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.116.0';
 import { z } from 'npm:zod@4.6.7';
 import { sendBulkRequestConfirmation } from '../_shared/notification.ts';
@@ -213,7 +214,7 @@ function getCatalog() {
 Deno.serve(async (request) => {
   const origin = request.headers.get('origin');
   const allowedOrigins = (Deno.env.get('BULK_ORDER_ALLOWED_ORIGINS') || '').split(',').map((value) => value.trim()).filter(Boolean);
-  if (origin && !allowedOrigins.includes(origin)) return reply(null, 403, { ok: false, error: 'Origin is not allowed.' });
+  if (origin && !(allowedOrigins.includes(origin) || isCanonicalWebsiteOrigin(origin))) return reply(null, 403, { ok: false, error: 'Origin is not allowed.' });
   if (request.method === 'OPTIONS') {
     return new Response(null, {
       status: 204,
@@ -326,7 +327,7 @@ Deno.serve(async (request) => {
         const size = Number((await info.json())?.size);
         return Number.isSafeInteger(size) ? size : null;
       };
-      let bytes = new Uint8Array(0);
+      let bytes: Uint8Array = new Uint8Array(0);
       let signatureValid: boolean;
       if (isCsv) {
         // CSV is validated as a whole document (<= 5 MB). The authoritative size is the body length of a full 200 response.
