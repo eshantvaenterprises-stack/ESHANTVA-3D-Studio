@@ -32,7 +32,7 @@ check(page.includes("canonical: '/contact/'"), 'Contact canonical missing.');
 check(page.includes('robots: { index: true, follow: true }'), 'Contact page must be indexable.');
 check(page.includes('BreadcrumbList'), 'Contact BreadcrumbList structured data missing.');
 
-check(contactConfig.publicEmail === 'eshantvaenterprises@gmail.com', 'Verified public email changed unexpectedly.');
+check(contactConfig.publicEmail === 'contact@eshantva3d.co.in', 'Founder-approved Studio business email must remain canonical.');
 check(siteConfig.email === contactConfig.publicEmail, 'Public email must be centralized consistently.');
 check(contactConfig.whatsappPublicContactEnabled === true, 'Founder-approved WhatsApp outbound contact must be enabled.');
 check(contactConfig.whatsappUsername === '@ESHANTVA_3D_Studio', 'Approved WhatsApp username changed.');

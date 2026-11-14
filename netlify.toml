@@ -1,0 +1,17 @@
+# Existing single static website. This file does not enable builds or publish.
+[build]
+  command = "npm ci && npm run build && node scripts/prepare-netlify-export.mjs"
+  publish = "out"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
+  NEXT_PUBLIC_SITE_URL = "https://eshantva3d.co.in"
+  NEXT_PUBLIC_BASE_PATH = ""
+  NEXT_PUBLIC_SUPABASE_URL = "https://lckcibqosxgwxycvqzxp.supabase.co"
+  NEXT_PUBLIC_RETAIL_SURFACE = "public"
+  NEXT_PUBLIC_RECRUITMENT_PORTAL_ENABLED = "false"
+  NEXT_PUBLIC_WEBSITE_FEATURES_ENABLED = "false"
+  NEXT_PUBLIC_REAL_PORTFOLIO_ENABLED = "false"
+  NEXT_PUBLIC_CHECKOUT_LOCAL_DELIVERY_ENABLED = "false"
+  NEXT_PUBLIC_CHECKOUT_SHIPPING_ENABLED = "false"

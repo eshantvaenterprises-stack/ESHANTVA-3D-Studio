@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from './zodCsp';
 import { bulkOrderConfig } from '@/config/bulkOrder';
 import { bulkTypes } from '@/types/bulkOrder';
 

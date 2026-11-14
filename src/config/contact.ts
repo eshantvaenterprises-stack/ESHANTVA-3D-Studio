@@ -1,5 +1,5 @@
 export const contactConfig = {
-  publicEmail: 'eshantvaenterprises@gmail.com',
+  publicEmail: 'contact@eshantva3d.co.in',
   sourceLabel: 'ESHANTVA Website',
   sourceCode: 'ESHANTVA-WEB',
   // Founder-approved public business contact handles, not recruitment channels.

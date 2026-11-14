@@ -114,11 +114,22 @@ function publicReference(kind: 'contact' | 'appointment') {
   return `${kind === 'appointment' ? 'AP' : 'CW'}-${new Date().getUTCFullYear()}-${suffix}`;
 }
 
+function isExactPreviewOrigin(origin: string | null, variable: string): boolean {
+  const configured = (Deno.env.get(variable) || '').trim();
+  if (!origin || origin !== configured) return false;
+  try {
+    const parsed = new URL(configured);
+    return parsed.protocol === 'https:' && parsed.origin === configured &&
+      parsed.hostname.endsWith('.netlify.app') && !parsed.port &&
+      !parsed.username && !parsed.password;
+  } catch { return false; }
+}
+
 Deno.serve(async (request) => {
   const origin = request.headers.get('origin');
   const allowedOrigins = (Deno.env.get('CONTACT_ALLOWED_ORIGINS') || '')
     .split(',').map((value) => value.trim()).filter(Boolean);
-  const allowedOrigin = origin && allowedOrigins.includes(origin) ? origin : null;
+  const allowedOrigin = origin && (allowedOrigins.includes(origin) || isExactPreviewOrigin(origin, 'CONTACT_PREVIEW_ALLOWED_ORIGIN')) ? origin : null;
 
   if (origin && !allowedOrigin) return reply(null, 403, { ok: false, error: 'Origin is not allowed.' });
   if (request.method === 'OPTIONS') {

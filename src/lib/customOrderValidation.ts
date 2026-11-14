@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from './zodCsp';
 import { customOrderConfig } from '@/config/customOrder';
 import { requestTypes } from '@/types/customOrder';
 

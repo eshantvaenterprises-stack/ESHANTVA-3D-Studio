@@ -4,7 +4,7 @@ import { retailVisibility } from '@/config/retailVisibility';
 export const siteConfig = {
   brand: 'ESHANTVA 3D Studio',
   shortBrand: 'ESHANTVA',
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || null,
+  siteUrl: process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://eshantva3d.co.in',
   basePath: process.env.NEXT_PUBLIC_BASE_PATH?.replace(/^\/+|\/+$/g, '')
     ? `/${process.env.NEXT_PUBLIC_BASE_PATH!.replace(/^\/+|\/+$/g, '')}`
     : '',
@@ -15,7 +15,7 @@ export const siteConfig = {
   directionsUrl: 'https://www.google.com/maps/dir/?api=1&destination=26.728898284570498%2C93.1584330441482',
   email: contactConfig.publicEmail,
   whatsapp: null,
-  domain: null,
+  domain: 'eshantva3d.co.in',
   panIndiaDelivery: true,
   localPickup: true,
   features: {

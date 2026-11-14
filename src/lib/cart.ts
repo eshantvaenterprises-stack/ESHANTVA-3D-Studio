@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from './zodCsp';
 import type { Product, ProductOption, SelectedProductOption } from '@/types/product';
 import { createConfigurationSignature, calculateConfiguredProductPrice } from '@/lib/productPricing';
 import { getProductBySlug } from '@/repositories/productRepository';
