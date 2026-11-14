@@ -4,10 +4,8 @@ import { createSmtpTlsTransport } from './smtpTransport.ts';
 
 type RpcClient = { rpc(name: string, args: Record<string, unknown>): PromiseLike<{ data: unknown; error: unknown }> };
 
-// OPEN-10 is DEFERRED_NOT_PASS for this release. Environment configuration
-// cannot activate request delivery; enabling it requires a separately reviewed
-// source change after event/recipient authorization. Existing Gmail Auth config
-// is independent and unchanged.
+// OPEN-10 remains deferred. Auth SMTP configuration cannot enable application
+// notification dispatch; release requires a separately reviewed source change.
 const REQUEST_NOTIFICATION_RELEASE_ENABLED: boolean = false;
 
 // Explicit opt-in only. Missing/invalid transport or ledger must never undo a
