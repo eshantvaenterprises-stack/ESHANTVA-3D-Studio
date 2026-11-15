@@ -44,6 +44,31 @@ const routes = [
 for (const [, dest] of routes) {
   if (!existsSync(join(out, dest, 'index.html'))) throw new Error(`Missing exported shell: ${dest}`);
 }
-writeFileSync(join(out, '_redirects'), routes.flatMap(([from,to]) => ['', '/'].map(s => `${from}${s} ${to} 200`)).join('\n') + '\n');
+// Next's client prefetches flat segment names. Some captured exports instead
+// contain nested page segments. Inspect the actual layout; keep the aliases
+// exact: a catch-all would turn missing/private URLs into successful shells.
+const rscAliases = [];
+for (const segment of ['services', 'custom-order', 'bulk-order']) {
+  const [from, dest] = [
+    `/${segment}/__next.${segment}.__PAGE__.txt`,
+    `/${segment}/__next.${segment}/__PAGE__.txt`,
+  ];
+  const nativePayload = existsSync(join(out, from));
+  const selectedPath = nativePayload ? from : dest;
+  const payloadPath = join(out, selectedPath);
+  if (!existsSync(payloadPath)) throw new Error(`Missing exported RSC payload: ${selectedPath}`);
+  const payload = readFileSync(payloadPath, 'utf8');
+  // A nonempty JSON/HTML error body is not a Flight segment. Require a
+  // row identifier before accepting either layout, without parsing the
+  // versioned Flight protocol or changing its bytes.
+  if (!payload.trim() || /^\s*</.test(payload) || !/^[0-9a-f]+:/im.test(payload)) {
+    throw new Error(`Invalid exported RSC payload: ${selectedPath}`);
+  }
+  if (!nativePayload) rscAliases.push([from, dest]);
+}
+writeFileSync(join(out, '_redirects'), [
+  ...routes.flatMap(([from,to]) => ['', '/'].map(s => `${from}${s} ${to} 200`)),
+  ...rscAliases.map(([from,to]) => `${from} ${to} 200`),
+].join('\n') + '\n');
 writeFileSync(join(out, 'robots.txt'), 'User-agent: *\nDisallow: /\n');
-console.log(`NETLIFY_PROTECTED_EXPORT_PREPARED: 12 direct-path rules; ${hashes.size} inline hashes; no upload performed.`);
+console.log(`NETLIFY_PROTECTED_EXPORT_PREPARED: 12 direct-path rules; ${rscAliases.length} RSC aliases; ${hashes.size} inline hashes; no upload performed.`);

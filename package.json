@@ -50,6 +50,8 @@
     "test:upload-handlers": "node --import tsx scripts/upload-handler-tests.mjs",
     "test:notifications": "node --import tsx scripts/notification-tests.ts && node scripts/notification-release-guard-tests.mjs",
     "test:host-neutral-http": "node scripts/host-neutral-http-tests.mjs",
+    "test:netlify-export": "node scripts/netlify-export-tests.mjs && node scripts/netlify-export-http-tests.mjs",
+    "test:notification-ledger": "node --import tsx scripts/notification-ledger-boundary-tests.mjs",
     "test:edge-boundary-parity": "node scripts/edge-boundary-parity-tests.mjs",
     "test:request-notifications": "node --import tsx scripts/request-notification-handler-tests.mjs",
     "test:edge-semantic-parity": "node scripts/edge-semantic-parity-tests.mjs",

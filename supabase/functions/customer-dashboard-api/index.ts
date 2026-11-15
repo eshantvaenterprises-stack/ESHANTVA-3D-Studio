@@ -1,6 +1,11 @@
 import { isCanonicalWebsiteOrigin } from '../_shared/canonicalOrigin.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.116.0';
 
+// Preserve the SDK's existing ungenerated database generic. Inferring the
+// overloaded createClient return type without it makes query rows `never`.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- no generated database schema exists here
+type EdgeDatabaseSchema = any;
+
 const activeOrderStatuses = new Set(['pending_payment','payment_processing','paid','under_review','confirmed','in_production','ready_for_pickup','shipped']);
 const safeOrderEventTypes = new Set(['order_created','payment_confirmed','status_changed']);
 const safeOrderDetailEventTypes = new Set(['order_created','payment_confirmed','status_changed','dispatched','delivered']);
@@ -60,7 +65,7 @@ function safeOptions(value: unknown) {
   }).slice(0,30);
 }
 
-async function dashboardOverview(admin: ReturnType<typeof createClient<any, 'public'>>, user: { id:string; email?:string; user_metadata?:Record<string,unknown> }, origin: string | null) {
+async function dashboardOverview(admin: ReturnType<typeof createClient<EdgeDatabaseSchema, 'public'>>, user: { id:string; email?:string; user_metadata?:Record<string,unknown> }, origin: string | null) {
   const [ordersResult, customResult, bulkResult, ordersCount, activeOrdersCount, customCount, bulkCount] = await Promise.all([
     admin.from('orders').select('id,public_order_id,status,payment_status,currency,total_paise,delivery_method,created_at').eq('customer_id', user.id).order('created_at', { ascending:false }).limit(20),
     admin.from('custom_requests').select('public_request_id,status,submitted_at,created_at').eq('customer_id', user.id).neq('status','DRAFT').not('public_request_id','is',null).order('created_at', { ascending:false }).limit(8),
@@ -129,7 +134,7 @@ async function dashboardOverview(admin: ReturnType<typeof createClient<any, 'pub
   } });
 }
 
-async function orderDetail(admin: ReturnType<typeof createClient<any, 'public'>>, userId: string, body: Record<string,unknown>, origin: string | null) {
+async function orderDetail(admin: ReturnType<typeof createClient<EdgeDatabaseSchema, 'public'>>, userId: string, body: Record<string,unknown>, origin: string | null) {
   const reference = typeof body.reference === 'string' ? body.reference.trim().toUpperCase() : '';
   if (!publicOrderReferencePattern.test(reference)) return response(origin, 404, { ok:false, error:'Order unavailable.', code:'ORDER_UNAVAILABLE' });
 
@@ -237,7 +242,7 @@ function approvalStatusLabel(status: string) {
 }
 
 async function ownedOrderId(
-  admin: ReturnType<typeof createClient<any, 'public'>>,
+  admin: ReturnType<typeof createClient<EdgeDatabaseSchema, 'public'>>,
   customerId: string,
   reference: string,
 ) {
@@ -252,7 +257,7 @@ async function ownedOrderId(
 }
 
 async function orderFilesOverview(
-  admin: ReturnType<typeof createClient<any, 'public'>>,
+  admin: ReturnType<typeof createClient<EdgeDatabaseSchema, 'public'>>,
   customerId: string,
   body: Record<string,unknown>,
   origin: string | null,
@@ -370,7 +375,7 @@ async function orderFilesOverview(
 }
 
 async function artifactAccess(
-  admin: ReturnType<typeof createClient<any, 'public'>>,
+  admin: ReturnType<typeof createClient<EdgeDatabaseSchema, 'public'>>,
   customerId: string,
   body: Record<string,unknown>,
   origin: string | null,
@@ -416,7 +421,7 @@ async function artifactAccess(
 }
 
 async function submitArtifactApproval(
-  admin: ReturnType<typeof createClient<any, 'public'>>,
+  admin: ReturnType<typeof createClient<EdgeDatabaseSchema, 'public'>>,
   customerId: string,
   body: Record<string,unknown>,
   origin: string | null,

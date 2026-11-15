@@ -16,7 +16,7 @@ createRoot(document.getElementById('root')).render(kind==='bulk'?<BulkOrderSucce
 const bundle=await build({stdin:{contents:entry,resolveDir:process.cwd(),loader:'jsx'},bundle:true,write:false,jsx:'automatic',plugins:[{name:'ui-stubs',setup(b){b.onResolve({filter:/^next\/link$/},()=>({path:'link',namespace:'stub'}));b.onResolve({filter:/^@\/config\/retailVisibility$/},()=>({path:'retail',namespace:'stub'}));b.onLoad({filter:/.*/,namespace:'stub'},a=>({contents:a.path==='retail'?'export const retailVisibility={isInternal:false}':"import React from'react';export default function Link({children,...p}){return React.createElement('a',p,children)}",loader:'jsx',resolveDir:process.cwd()}));}}]});
 const server=http.createServer((req,res)=>{res.setHeader('Content-Type',req.url==='/app.js'?'text/javascript':'text/html');res.end(req.url==='/app.js'?bundle.outputFiles[0].text:'<!doctype html><div id="root"></div><script src="/app.js"></script>')});
 await new Promise(r=>server.listen(0,'127.0.0.1',r));let browser;
-try{browser=await chromium.launch({headless:true,channel:'msedge'});}catch(e){server.close();throw e;}
+try{browser=await chromium.launch({headless:true,...(process.env.ESHANTVA_CHROMIUM_EXECUTABLE ? {executablePath:process.env.ESHANTVA_CHROMIUM_EXECUTABLE} : {channel:'msedge'})});}catch(e){server.close();throw e;}
 const origin=`http://127.0.0.1:${server.address().port}`,context=await browser.newContext(),results=[];let external=0;
 await context.route('**/*',r=>new URL(r.request().url()).origin===origin?r.continue():(external++,r.abort()));
 try{for(const kind of ['custom','bulk'])for(const mode of ['invalid-date','invalid-shape','blocked-storage','missing','valid','accepted-memory-receipt']){

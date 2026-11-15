@@ -13,7 +13,11 @@ let checks = 0;
 for (const slug of ['custom-request-api', 'bulk-request-api', 'contact-request-api', 'checkout-order-api', 'customer-dashboard-api', 'admin-api', 'admin-artifact-api']) {
   for (const captured of [false]) {
     const file = captured ? `../backend/edge-functions/${slug}/deployed-source/index.ts` : `supabase/functions/${slug}/index.ts`;
-    const source = fs.readFileSync(file, 'utf8').replace(/^import[^\n]+\r?\n/gm, '');
+    // The source now imports the canonical-origin guard. Execute that actual
+    // shared module too; stripping imports must not leave an undefined guard
+    // or replace security policy with a permissive test double.
+    const canonicalOrigin = fs.readFileSync('supabase/functions/_shared/canonicalOrigin.ts', 'utf8').replace(/^export /gm, '');
+    const source = canonicalOrigin + '\n' + fs.readFileSync(file, 'utf8').replace(/^import[^\n]+\r?\n/gm, '');
     const code = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None } }).outputText;
     let handler, currentUser = null;
     const queries = [];

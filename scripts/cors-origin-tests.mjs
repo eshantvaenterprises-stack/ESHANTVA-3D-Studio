@@ -5,7 +5,8 @@ import ts from 'typescript';
 import { z } from 'zod';
 let checks = 0;
 for (const slug of ['custom-request-api', 'bulk-request-api', 'contact-request-api', 'checkout-order-api', 'customer-dashboard-api', 'admin-api', 'admin-artifact-api', 'website-features-api']) {
-  const source = fs.readFileSync(`supabase/functions/${slug}/index.ts`, 'utf8').replace(/^import[^\n]+\r?\n/gm, '');
+  const canonicalOrigin = fs.readFileSync('supabase/functions/_shared/canonicalOrigin.ts', 'utf8').replace(/^export /gm, '');
+  const source = canonicalOrigin + '\n' + fs.readFileSync(`supabase/functions/${slug}/index.ts`, 'utf8').replace(/^import[^\n]+\r?\n/gm, '');
   const code = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.None } }).outputText;
   let handler;
   vm.runInNewContext(code, { z, createClient() { throw Error('CORS must reject before database access'); }, Deno: { serve(fn) { handler = fn; }, env: { get: key => key.endsWith('_ALLOWED_ORIGINS') ? 'https://allowed.example.invalid' : '' } }, Response, Request, URL, TextEncoder, TextDecoder, Uint8Array, crypto, console });

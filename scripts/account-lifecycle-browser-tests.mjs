@@ -49,7 +49,7 @@ const server=http.createServer((req,res)=>{res.setHeader('Content-Type',req.url=
 await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const origin=`http://127.0.0.1:${server.address().port}`;
 let browser;
-try{browser=await chromium.launch({headless:true,channel:'msedge'});}catch(e){server.close();throw e;}
+try{browser=await chromium.launch({headless:true,...(process.env.ESHANTVA_CHROMIUM_EXECUTABLE ? {executablePath:process.env.ESHANTVA_CHROMIUM_EXECUTABLE} : {channel:'msedge'})});}catch(e){server.close();throw e;}
 const context=await browser.newContext();
 let externalRequests=0;
 await context.route('**/*',route=>{if(new URL(route.request().url()).origin!==origin){externalRequests++;return route.abort();}return route.continue();});
